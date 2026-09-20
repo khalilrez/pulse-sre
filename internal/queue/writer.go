@@ -1,4 +1,4 @@
-// simple append-only log writer for events 
+// simple append-only log writer for events
 package queue
 
 import (
@@ -50,10 +50,34 @@ func OpenWriter(dir string, syncEvery bool) (*Writer, error) {
 
 	return w, nil
 }
+func isJSON(b []byte) bool {
+	var js json.RawMessage
+	return json.Unmarshal(b, &js) == nil
+}
 
+func validateEvent(e Event) bool {
+	switch {
+	case e.EventType == "":
+		return false
+	case !isJSON(e.Payload):
+		return false
+	case e.Timestamp.IsZero():
+		return false
+	case e.ID == "":
+		return false
+	default:
+		return true
+	}
+}
 func (w *Writer) Write(e Event) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
+
+	// validate the event
+	if valid := validateEvent(e); !valid {
+		return fmt.Errorf("invalid event: %v", e)
+	}
+
 	b, err := json.Marshal(e)
 	if err != nil {
 		return fmt.Errorf("failed to marshal event: %w", err)
