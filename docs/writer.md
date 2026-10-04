@@ -3,7 +3,7 @@
 This document covers the `Writer` half of `internal/queue` — the append-only
 log writer used by the ingest API. It's written as a build log rather than
 just a spec, because the bugs found along the way are as informative as the
-final code, and worth being able to talk through in an interview.
+final code,.
 
 ## What it is
 
